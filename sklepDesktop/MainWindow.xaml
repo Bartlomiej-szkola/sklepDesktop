@@ -1,0 +1,56 @@
+﻿<Window x:Class="sklepDesktop.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Sklep WPF - Klient" Height="450" Width="800">
+    <Grid Margin="10">
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="20" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <!-- LEWA STRONA: SKANOWANIE -->
+        <GroupBox Header="Skaner / Sprzedaż" Grid.Column="0">
+            <StackPanel Margin="10">
+                <Label Content="Zeskanuj kod kreskowy:" FontWeight="Bold"/>
+                <!-- KeyDown="TxtScan_KeyDown" to klucz do obsługi skanera! -->
+                <TextBox Name="TxtScan" Height="30" FontSize="16" KeyDown="TxtScan_KeyDown"/>
+                
+                <Button Content="Szukaj (Manualnie)" Margin="0,5,0,20" Click="BtnSearch_Click"/>
+
+                <Border BorderBrush="Gray" BorderThickness="1" Padding="10" Background="#F0F0F0">
+                    <StackPanel>
+                        <TextBlock Text="Wynik skanowania:" FontWeight="Bold"/>
+                        <TextBlock Name="LblResultName" Text="Nazwa: -" FontSize="18" Margin="0,10,0,0"/>
+                        <TextBlock Name="LblResultPrice" Text="Cena: -" FontSize="24" FontWeight="Bold" Foreground="Green"/>
+                        <TextBlock Name="LblResultDesc" Text="Opis: -" FontStyle="Italic"/>
+                        <TextBlock Name="LblResultStock" Text="Stan: -"/>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </GroupBox>
+
+        <!-- PRAWA STRONA: DODAWANIE -->
+        <GroupBox Header="Dodaj nowy towar" Grid.Column="2">
+            <StackPanel Margin="10">
+                <Label Content="Kod kreskowy:"/>
+                <TextBox Name="TxtNewBarcode"/>
+
+                <Label Content="Nazwa:"/>
+                <TextBox Name="TxtNewName"/>
+
+                <Label Content="Opis:"/>
+                <TextBox Name="TxtNewDesc"/>
+
+                <Label Content="Cena (np. 12,99):"/>
+                <TextBox Name="TxtNewPrice"/>
+
+                <Label Content="Ilość na stanie:"/>
+                <TextBox Name="TxtNewQty"/>
+
+                <Button Content="Zapisz w bazie" Margin="0,20,0,0" Height="30" Background="#DDDDFF" Click="BtnAdd_Click"/>
+                <TextBlock Name="LblStatus" Foreground="Blue" Margin="0,10,0,0" TextWrapping="Wrap"/>
+            </StackPanel>
+        </GroupBox>
+    </Grid>
+</Window>
