@@ -62,36 +62,98 @@
                 </Grid>
             </TabItem>
 
-            <!-- ZAKŁADKA 2: AKTUALIZACJA PRODUKTU (Nowy Panel) -->
+            <!-- ZAKŁADKA 2: AKTUALIZACJA PRODUKTU (Nowy Panel - układ dwukolumnowy) -->
             <TabItem Header="Edycja Produktu">
-                <StackPanel Margin="20" MaxWidth="500" HorizontalAlignment="Left">
-                    <GroupBox Header="Krok 1: Zeskanuj produkt do edycji" Margin="0,0,0,20">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <!-- Kolumna lewa: Skanowanie -->
+                        <ColumnDefinition Width="20" />
+                        <!-- Odstęp między kolumnami -->
+                        <ColumnDefinition Width="*" />
+                        <!-- Kolumna prawa: Edycja danych -->
+                    </Grid.ColumnDefinitions>
+
+                    <!-- LEWA STRONA: SKANOWANIE DO EDYCJI -->
+                    <GroupBox Header="Krok 1: Zeskanuj produkt do edycji" Grid.Column="0" VerticalAlignment="Top">
                         <StackPanel Margin="10">
-                            <Label Content="Kod kreskowy:"/>
-                            <TextBox Name="TxtUpdateSearchBarcode" Height="30" FontSize="16" KeyDown="TxtUpdateSearchBarcode_KeyDown"/>
-                            <TextBlock Name="LblUpdateSearchStatus" Text="Czekam na skan..." Foreground="Gray" Margin="0,5,0,0"/>
+                            <Label Content="Zeskanuj kod towaru:" FontWeight="Bold"/>
+                            <TextBox Name="TxtUpdateSearchBarcode" 
+                         Height="35" 
+                         FontSize="18" 
+                         VerticalContentAlignment="Center"
+                         KeyDown="TxtUpdateSearchBarcode_KeyDown"/>
+
+                            <Border Margin="0,15,0,0" Padding="10" Background="#FFF9F0" BorderBrush="#FFE4B5" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Name="LblUpdateSearchStatus" 
+                                   Text="Czekam na skanowanie..." 
+                                   TextWrapping="Wrap" 
+                                   FontSize="14" 
+                                   Foreground="Gray"/>
+                                </StackPanel>
+                            </Border>
+
+                            <TextBlock Text="Wskazówka: Po zeskanowaniu dane pojawią się w panelu po prawej stronie." 
+                           Margin="0,20,0,0" 
+                           Foreground="DarkGray" 
+                           FontStyle="Italic" 
+                           TextWrapping="Wrap"/>
                         </StackPanel>
                     </GroupBox>
 
-                    <GroupBox Header="Krok 2: Edytuj dane" Name="GroupEditFields" IsEnabled="False">
-                        <StackPanel Margin="10">
-                            <Label Content="Nazwa:"/>
-                            <TextBox Name="TxtUpdateName" Margin="0,0,0,5"/>
+                    <!-- PRAWA STRONA: FORMULARZ EDYCJI -->
+                    <GroupBox Header="Krok 2: Edytuj dane produktu" 
+                  Grid.Column="2" 
+                  Name="GroupEditFields" 
+                  IsEnabled="False">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="10">
+                                <Label Content="Nazwa produktu:"/>
+                                <TextBox Name="TxtUpdateName" Height="25" Margin="0,0,0,10"/>
 
-                            <Label Content="Opis:"/>
-                            <TextBox Name="TxtUpdateDesc" Margin="0,0,0,5"/>
+                                <Label Content="Opis:"/>
+                                <TextBox Name="TxtUpdateDesc" 
+                             Height="60" 
+                             AcceptsReturn="True" 
+                             TextWrapping="Wrap" 
+                             Margin="0,0,0,10"/>
 
-                            <Label Content="Cena:"/>
-                            <TextBox Name="TxtUpdatePrice" Margin="0,0,0,5"/>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                            <Label Content="Ilość na stanie:"/>
-                            <TextBox Name="TxtUpdateQty" Margin="0,0,0,10"/>
+                                    <StackPanel Grid.Column="0">
+                                        <Label Content="Cena (PLN):"/>
+                                        <TextBox Name="TxtUpdatePrice" Height="25"/>
+                                    </StackPanel>
 
-                            <Button Content="Zapisz zmiany w bazie" Height="40" Background="LightBlue" Click="BtnUpdateSave_Click"/>
-                            <TextBlock Name="LblUpdateResult" Margin="0,10,0,0" TextAlignment="Center"/>
-                        </StackPanel>
+                                    <StackPanel Grid.Column="2">
+                                        <Label Content="Ilość na stanie:"/>
+                                        <TextBox Name="TxtUpdateQty" Height="25"/>
+                                    </StackPanel>
+                                </Grid>
+
+                                <Button Content="Zapisz zmiany (Update)" 
+                            Margin="0,30,0,10" 
+                            Height="45" 
+                            FontSize="16"
+                            FontWeight="Bold"
+                            Background="#E1F5FE" 
+                            Click="BtnUpdateSave_Click"/>
+
+                                <TextBlock Name="LblUpdateResult" 
+                               FontSize="14" 
+                               FontWeight="Bold" 
+                               TextAlignment="Center" 
+                               Margin="0,5,0,0"/>
+                            </StackPanel>
+                        </ScrollViewer>
                     </GroupBox>
-                </StackPanel>
+                </Grid>
             </TabItem>
 
         </TabControl>
