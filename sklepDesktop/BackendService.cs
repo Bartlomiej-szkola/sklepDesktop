@@ -11,12 +11,13 @@ namespace sklepDesktop
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
+        private string ip = "http://192.168.0.14:8080";
 
         public BackendService()
         {
             _httpClient = new HttpClient();
             // ADRES TWOJEGO BACKENDU SPRINGOWEGO:
-            _httpClient.BaseAddress = new Uri("http://192.168.0.32:8080/api/products/");
+            _httpClient.BaseAddress = new Uri(ip + "/api/products/");
 
             // KONFIGURACJA JSON: To naprawia problem nulli w Javie!
             // Zamienia automatycznie Barcode -> barcode, StockQuantity -> stockQuantity
@@ -52,13 +53,38 @@ namespace sklepDesktop
         {
             try
             {
-                // POST /api/products
-                var response = await _httpClient.PostAsJsonAsync("", newProduct, _jsonOptions);
-                return response.IsSuccessStatusCode;
+                // 1. Definiujemy pełny adres (żeby uniknąć błędu 404 ze slashem)
+                string url = ip + "/api/products";
+
+                // 2. Tworzymy obiekt anonimowy BEZ pola Id.
+                // Wyślemy tylko to, co serwer akceptuje.
+                var dataToSend = new
+                {
+                    barcode = newProduct.Barcode,
+                    name = newProduct.Name,
+                    description = newProduct.Description,
+                    price = newProduct.Price,
+                    stockQuantity = newProduct.StockQuantity
+                };
+
+                // 3. Wysyłamy obiekt anonimowy
+                // Używamy _jsonOptions, aby zachować camelCase (np. stockQuantity)
+                var response = await _httpClient.PostAsJsonAsync(url, dataToSend, _jsonOptions);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    return true;
+                }
+                else
+                {
+                    string errorBody = await response.Content.ReadAsStringAsync();
+                    MessageBox.Show($"Serwer odrzucił produkt ({response.StatusCode}):\n{errorBody}");
+                    return false;
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show("Nie udało się dodać: " + ex.Message);
+                MessageBox.Show("Wyjątek podczas dodawania: " + ex.Message);
                 return false;
             }
         }
