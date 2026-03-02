@@ -77,7 +77,44 @@ namespace sklepDesktop
         }
 
         // --- OBSŁUGA DODAWANIA ---
+        private async void TxtNewBarcode_KeyDown(object sender, KeyEventArgs e)
+        {
+            // Jeśli skaner wysłał Enter lub użytkownik kliknął Enter
+            if (e.Key == Key.Enter)
+            {
+                string barcode = TxtNewBarcode.Text.Trim();
+                if (string.IsNullOrWhiteSpace(barcode)) return;
 
+                // 1. Zaznaczamy, że pobieramy dane
+                LblExternalStatus.Text = "Pobieranie danych z bazy zewnętrznej...";
+                LblExternalStatus.Foreground = System.Windows.Media.Brushes.Orange;
+
+                // 2. Wywołujemy API zewnętrzne
+                var externalInfo = await _service.GetExternalProductInfo(barcode);
+
+                if (externalInfo != null)
+                {
+                    // 3. Sukces - uzupełniamy pola
+                    TxtNewName.Text = externalInfo.Value.Name;
+                    TxtNewDesc.Text = externalInfo.Value.Description;
+
+                    LblExternalStatus.Text = "Dane pobrane automatycznie!";
+                    LblExternalStatus.Foreground = System.Windows.Media.Brushes.Green;
+
+                    // Przeskakujemy od razu do ceny, żeby było szybciej
+                    TxtNewPrice.Focus();
+                }
+                else
+                {
+                    // 4. Błąd / Brak produktu
+                    LblExternalStatus.Text = "Nie znaleziono produktu w bazie zewnętrznej. Wpisz ręcznie.";
+                    LblExternalStatus.Foreground = System.Windows.Media.Brushes.Red;
+
+                    // Ustawiamy fokus na nazwę, żeby wpisać ręcznie
+                    TxtNewName.Focus();
+                }
+            }
+        }
         private async void BtnAdd_Click(object sender, RoutedEventArgs e)
         {
             // Prosta walidacja

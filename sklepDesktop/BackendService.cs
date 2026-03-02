@@ -28,6 +28,43 @@ namespace sklepDesktop
             };
         }
 
+        // Dodaj na górze metody BackendService
+        public async Task<(string Name, string Description)?> GetExternalProductInfo(string barcode)
+        {
+            using (HttpClient externalClient = new HttpClient())
+            {
+                try
+                {
+                    // Adres zewnętrznego API
+                    string url = $"https://api.zdrowezakupy.org/api/2.0/product/{barcode}";
+
+                    var response = await externalClient.GetAsync(url);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        // Parsujemy odpowiedź
+                        var json = await response.Content.ReadAsStringAsync();
+                        using (JsonDocument doc = JsonDocument.Parse(json))
+                        {
+                            // Wyciągamy pola name i description (sprawdź w dokumentacji API dokładne nazwy pól)
+                            // Zakładam standardowe: "name" i "description"
+                            string name = doc.RootElement.GetProperty("name").GetString();
+                            string desc = doc.RootElement.TryGetProperty("description", out var descProp)
+                                          ? descProp.GetString()
+                                          : "";
+
+                            return (name, desc);
+                        }
+                    }
+                    return null; // Kod 400, 404 itp.
+                }
+                catch
+                {
+                    return null; // Błąd sieci
+                }
+            }
+        }
+
         // Metoda do pobierania produktu (skanowanie)
         public async Task<Product?> GetProductByBarcode(string barcode)
         {

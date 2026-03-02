@@ -34,7 +34,10 @@
         <GroupBox Header="Dodaj nowy towar" Grid.Column="2">
             <StackPanel Margin="10">
                 <Label Content="Kod kreskowy:"/>
-                <TextBox Name="TxtNewBarcode"/>
+                <TextBox Name="TxtNewBarcode" KeyDown="TxtNewBarcode_KeyDown"/>
+
+                <!-- Status pobierania z API zewnętrznego -->
+                <TextBlock Name="LblExternalStatus" Text="" Foreground="Orange" FontSize="10" Margin="0,2,0,5"/>
 
                 <Label Content="Nazwa:"/>
                 <TextBox Name="TxtNewName"/>
