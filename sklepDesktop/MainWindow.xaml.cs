@@ -236,5 +236,90 @@ namespace sklepDesktop
                 LblUpdateResult.Foreground = System.Windows.Media.Brushes.Red;
             }
         }
+
+
+        // --- LOGIKA PANELU DOSTAW ---
+
+        private async void TxtDeliveryBarcode_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                string barcode = TxtDeliveryBarcode.Text.Trim();
+                if (string.IsNullOrWhiteSpace(barcode)) return;
+
+                // Reset statusów
+                LblDeliveryScanStatus.Text = "Szukanie w bazie...";
+                LblDeliveryScanStatus.Foreground = System.Windows.Media.Brushes.Orange;
+                LblDeliveryResult.Text = "";
+
+                try
+                {
+                    var product = await _service.GetProductByBarcode(barcode);
+
+                    if (product != null)
+                    {
+                        // SUKCES: Produkt znaleziony
+                        LblDeliveryProdName.Text = $"Produkt: {product.Name}";
+                        LblDeliveryCurrentStock.Text = $"Obecny stan: {product.StockQuantity} szt.";
+                        LblDeliveryScanStatus.Text = "Znaleziono. Wpisz ilość po prawej.";
+                        LblDeliveryScanStatus.Foreground = System.Windows.Media.Brushes.Green;
+
+                        GroupDeliveryFields.IsEnabled = true;
+                        TxtDeliveryAmount.Focus();
+                    }
+                    else
+                    {
+                        // BŁĄD: Brak produktu
+                        LblDeliveryScanStatus.Text = "BŁĄD: Nie znaleziono produktu w bazie!";
+                        LblDeliveryScanStatus.Foreground = System.Windows.Media.Brushes.Red;
+                        LblDeliveryProdName.Text = "Produkt: -";
+                        LblDeliveryCurrentStock.Text = "Obecny stan: -";
+                        GroupDeliveryFields.IsEnabled = false;
+                    }
+                }
+                catch (Exception)
+                {
+                    // BŁĄD: Brak połączenia
+                    LblDeliveryScanStatus.Text = "BŁĄD: Brak połączenia z serwerem!";
+                    LblDeliveryScanStatus.Foreground = System.Windows.Media.Brushes.Red;
+                    GroupDeliveryFields.IsEnabled = false;
+                }
+            }
+        }
+
+        private async void BtnDeliverySave_Click(object sender, RoutedEventArgs e)
+        {
+            if (!int.TryParse(TxtDeliveryAmount.Text, out int amount) || amount <= 0)
+            {
+                LblDeliveryResult.Text = "Wpisz poprawną liczbę!";
+                LblDeliveryResult.Foreground = System.Windows.Media.Brushes.Red;
+                return;
+            }
+
+            LblDeliveryResult.Text = "Zapisywanie...";
+            LblDeliveryResult.Foreground = System.Windows.Media.Brushes.Orange;
+
+            bool success = await _service.AddQuantity(TxtDeliveryBarcode.Text, amount);
+
+            if (success)
+            {
+                LblDeliveryResult.Text = $"SUKCES: Dodano {amount} sztuk!";
+                LblDeliveryResult.Foreground = System.Windows.Media.Brushes.Green;
+
+                // Czyścimy wszystko po 2 sekundach lub czekamy na nowy skan
+                GroupDeliveryFields.IsEnabled = false;
+                TxtDeliveryBarcode.Clear();
+                TxtDeliveryBarcode.Focus();
+                LblDeliveryProdName.Text = "Produkt: -";
+                LblDeliveryCurrentStock.Text = "Obecny stan: -";
+                LblDeliveryScanStatus.Text = "Czekam na kolejny skan...";
+                LblDeliveryScanStatus.Foreground = System.Windows.Media.Brushes.Gray;
+            }
+            else
+            {
+                LblDeliveryResult.Text = "BŁĄD: Nie udało się zaktualizować bazy.";
+                LblDeliveryResult.Foreground = System.Windows.Media.Brushes.Red;
+            }
+        }
     }
 }

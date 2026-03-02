@@ -160,5 +160,20 @@ namespace sklepDesktop
                 return false;
             }
         }
+
+
+        public async Task<bool> AddQuantity(string barcode, int amount)
+        {
+            try
+            {
+                string url = $"{ip}/api/products/addQuantity/{barcode}?amount={amount}";
+                var response = await _httpClient.PatchAsync(url, null);
+                return response.IsSuccessStatusCode;
+            }
+            catch (Exception)
+            {
+                return false; // Błąd połączenia obsłużymy w UI
+            }
+        }
     }
 }

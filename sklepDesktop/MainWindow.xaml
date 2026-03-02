@@ -156,6 +156,47 @@
                 </Grid>
             </TabItem>
 
+            <!-- ZAKŁADKA 3: DOSTAWY -->
+            <TabItem Header="Dostawa (Przyjęcie)">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- LEWA STRONA: SKANOWANIE DOSTAWY -->
+                    <GroupBox Header="Krok 1: Zeskanuj przywieziony towar" Grid.Column="0" VerticalAlignment="Top">
+                        <StackPanel Margin="10">
+                            <Label Content="Kod kreskowy:" FontWeight="Bold"/>
+                            <TextBox Name="TxtDeliveryBarcode" Height="35" FontSize="18" VerticalContentAlignment="Center" KeyDown="TxtDeliveryBarcode_KeyDown"/>
+
+                            <!-- STATUS SKANOWANIA (Zamiast MessageBox) -->
+                            <Border Margin="0,15,0,0" Padding="15" Background="#F8F9FA" BorderBrush="#DEE2E6" BorderThickness="1">
+                                <StackPanel>
+                                    <TextBlock Name="LblDeliveryProdName" Text="Produkt: -" FontSize="16" FontWeight="Bold" Margin="0,0,0,5"/>
+                                    <TextBlock Name="LblDeliveryCurrentStock" Text="Obecny stan: -" FontSize="14" Foreground="Gray"/>
+                                    <TextBlock Name="LblDeliveryScanStatus" Text="Czekam na skan..." Margin="0,10,0,0" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </GroupBox>
+
+                    <!-- PRAWA STRONA: ILOŚĆ DOSTAWY -->
+                    <GroupBox Header="Krok 2: Ile sztuk dostarczono?" Grid.Column="2" Name="GroupDeliveryFields" IsEnabled="False">
+                        <StackPanel Margin="10">
+                            <Label Content="Liczba nowych sztuk:"/>
+                            <TextBox Name="TxtDeliveryAmount" Height="40" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center" Margin="0,0,0,20"/>
+
+                            <Button Content="Zatwierdź dostawę (+)" Height="50" FontSize="18" FontWeight="Bold" Background="#4CAF50" Foreground="White" Click="BtnDeliverySave_Click"/>
+
+                            <!-- STATUS ZAPISU -->
+                            <TextBlock Name="LblDeliveryResult" FontSize="14" FontWeight="Bold" TextAlignment="Center" Margin="0,15,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </GroupBox>
+                </Grid>
+            </TabItem>
+
         </TabControl>
     </Grid>
     
