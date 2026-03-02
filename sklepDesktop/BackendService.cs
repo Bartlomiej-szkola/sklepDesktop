@@ -125,5 +125,40 @@ namespace sklepDesktop
                 return false;
             }
         }
+
+        // Dodaj do klasy BackendService
+        public async Task<bool> UpdateProduct(string barcode, Product updatedProduct)
+        {
+            try
+            {
+                // Adres: /api/products/update/123456
+                string url = $"{ip}/api/products/update/{barcode}";
+
+                // Podobnie jak przy dodawaniu, wysyłamy obiekt bez ID
+                var dataToSend = new
+                {
+                    barcode = updatedProduct.Barcode,
+                    name = updatedProduct.Name,
+                    description = updatedProduct.Description,
+                    price = updatedProduct.Price,
+                    stockQuantity = updatedProduct.StockQuantity
+                };
+
+                // Zazwyczaj do aktualizacji używa się PUT, ale jeśli Twój serwer 
+                // obsługuje POST pod tym adresem, zamień PutAsJsonAsync na PostAsJsonAsync
+                var response = await _httpClient.PutAsJsonAsync(url, dataToSend, _jsonOptions);
+
+                if (response.IsSuccessStatusCode) return true;
+
+                string error = await response.Content.ReadAsStringAsync();
+                MessageBox.Show($"Błąd aktualizacji: {error}");
+                return false;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Wyjątek podczas aktualizacji: " + ex.Message);
+                return false;
+            }
+        }
     }
 }

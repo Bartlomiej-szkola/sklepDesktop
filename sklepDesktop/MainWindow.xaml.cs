@@ -159,5 +159,82 @@ namespace sklepDesktop
                 LblStatus.Text = "Błąd podczas dodawania (sprawdź czy kod już nie istnieje).";
             }
         }
+
+
+        // UPDATE panel
+        // 1. Skanowanie kodu w celu pobrania danych do edycji
+        private async void TxtUpdateSearchBarcode_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                string barcode = TxtUpdateSearchBarcode.Text.Trim();
+                if (string.IsNullOrWhiteSpace(barcode)) return;
+
+                LblUpdateSearchStatus.Text = "Pobieranie danych z bazy...";
+                var product = await _service.GetProductByBarcode(barcode);
+
+                if (product != null)
+                {
+                    // Wypełniamy pola edycji
+                    TxtUpdateName.Text = product.Name;
+                    TxtUpdateDesc.Text = product.Description;
+                    TxtUpdatePrice.Text = product.Price.ToString();
+                    TxtUpdateQty.Text = product.StockQuantity.ToString();
+
+                    // Aktywujemy pola edycji
+                    GroupEditFields.IsEnabled = true;
+                    LblUpdateSearchStatus.Text = "Produkt znaleziony. Możesz edytować.";
+                    LblUpdateSearchStatus.Foreground = System.Windows.Media.Brushes.Green;
+
+                    TxtUpdateName.Focus();
+                }
+                else
+                {
+                    GroupEditFields.IsEnabled = false;
+                    LblUpdateSearchStatus.Text = "Nie znaleziono produktu w Twojej bazie!";
+                    LblUpdateSearchStatus.Foreground = System.Windows.Media.Brushes.Red;
+                }
+            }
+        }
+
+        // 2. Zapisywanie zaktualizowanych danych
+        private async void BtnUpdateSave_Click(object sender, RoutedEventArgs e)
+        {
+            // Walidacja pól
+            if (!decimal.TryParse(TxtUpdatePrice.Text.Replace(",", "."), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal price) ||
+                !int.TryParse(TxtUpdateQty.Text, out int qty))
+            {
+                MessageBox.Show("Błędna cena lub ilość!");
+                return;
+            }
+
+            var updatedProduct = new Product
+            {
+                Barcode = TxtUpdateSearchBarcode.Text, // Oryginalny kod
+                Name = TxtUpdateName.Text,
+                Description = TxtUpdateDesc.Text,
+                Price = price,
+                StockQuantity = qty
+            };
+
+            // Uwaga: metoda w BackendService przyjmuje barcode i obiekt.
+            bool result = await _service.UpdateProduct(updatedProduct.Barcode, updatedProduct);
+
+            if (result)
+            {
+                LblUpdateResult.Text = "Zaktualizowano pomyślnie!";
+                LblUpdateResult.Foreground = System.Windows.Media.Brushes.Green;
+
+                // Opcjonalnie: wyczyść pola i zablokuj panel
+                GroupEditFields.IsEnabled = false;
+                TxtUpdateSearchBarcode.Clear();
+                TxtUpdateSearchBarcode.Focus();
+            }
+            else
+            {
+                LblUpdateResult.Text = "Błąd podczas zapisu!";
+                LblUpdateResult.Foreground = System.Windows.Media.Brushes.Red;
+            }
+        }
     }
 }
