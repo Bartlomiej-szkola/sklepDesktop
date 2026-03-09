@@ -8,6 +8,8 @@ using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
+using System.Collections.ObjectModel;
+using System.Linq;
 
 
 namespace sklepDesktop
@@ -18,6 +20,7 @@ namespace sklepDesktop
     public partial class MainWindow : Window
     {
         private readonly BackendService _service;
+        public ObservableCollection<BasketItem> Basket { get; set; } = new ObservableCollection<BasketItem>();
 
         public MainWindow()
         {
@@ -26,6 +29,7 @@ namespace sklepDesktop
 
             // Ustawiamy kursor od razu w polu skanowania po uruchomieniu
             TxtScan.Focus();
+            DgBasket.ItemsSource = Basket;
         }
 
         // --- OBSŁUGA SKANOWANIA ---
@@ -319,6 +323,90 @@ namespace sklepDesktop
             {
                 LblDeliveryResult.Text = "BŁĄD: Nie udało się zaktualizować bazy.";
                 LblDeliveryResult.Foreground = System.Windows.Media.Brushes.Red;
+            }
+        }
+
+        // KASA
+        // 1. Skanowanie w kasie
+        private async void TxtCashierScan_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.Key == Key.Enter)
+            {
+                string barcode = TxtCashierScan.Text.Trim();
+                TxtCashierScan.Clear();
+                if (string.IsNullOrWhiteSpace(barcode)) return;
+
+                var product = await _service.GetProductByBarcode(barcode);
+
+                if (product != null)
+                {
+                    // Sprawdź czy produkt już jest w koszyku
+                    var existing = Basket.FirstOrDefault(b => b.Barcode == barcode);
+                    if (existing != null)
+                    {
+                        existing.Quantity++;
+                    }
+                    else
+                    {
+                        Basket.Add(new BasketItem
+                        {
+                            Barcode = product.Barcode,
+                            Name = product.Name,
+                            Price = product.Price,
+                            Quantity = 1
+                        });
+                    }
+                    UpdateTotal();
+                    LblCashierStatus.Text = $"Dodano: {product.Name}";
+                    LblCashierStatus.Foreground = System.Windows.Media.Brushes.Green;
+                }
+                else
+                {
+                    LblCashierStatus.Text = "BŁĄD: Nieznany produkt!";
+                    LblCashierStatus.Foreground = System.Windows.Media.Brushes.Red;
+                }
+            }
+        }
+
+        // 2. Aktualizacja sumy
+        private void UpdateTotal()
+        {
+            decimal total = Basket.Sum(item => item.Total);
+            LblTotalSum.Text = $"{total:N2} PLN";
+        }
+
+        // 3. Finalizacja sprzedaży
+        private async void BtnFinalizeSale_Click(object sender, RoutedEventArgs e)
+        {
+            if (Basket.Count == 0) return;
+
+            bool success = await _service.FinalizeSale(Basket.ToList());
+
+            if (success)
+            {
+                MessageBox.Show("Sprzedaż zakończona pomyślnie!", "KASA");
+                Basket.Clear();
+                UpdateTotal();
+                LblCashierStatus.Text = "Zeskanuj produkt...";
+            }
+            else
+            {
+                MessageBox.Show("BŁĄD: Nie udało się sfinalizować sprzedaży. Sprawdź stany magazynowe.", "BŁĄD");
+            }
+        }
+
+        // 4. Funkcje pomocnicze
+        private void BtnRemoveLast_Click(object sender, RoutedEventArgs e)
+        {
+            if (Basket.Count > 0) { Basket.RemoveAt(Basket.Count - 1); UpdateTotal(); }
+        }
+
+        private void BtnClearBasket_Click(object sender, RoutedEventArgs e)
+        {
+            if (MessageBox.Show("Czy na pewno wyczyścić cały koszyk?", "Kasa", MessageBoxButton.YesNo) == MessageBoxResult.Yes)
+            {
+                Basket.Clear();
+                UpdateTotal();
             }
         }
     }

@@ -11,7 +11,7 @@ namespace sklepDesktop
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
-        private string ip = "http://192.168.0.14:8080";
+        private string ip = "http://192.168.0.56:8080";
 
         public BackendService()
         {
@@ -174,6 +174,20 @@ namespace sklepDesktop
             {
                 return false; // Błąd połączenia obsłużymy w UI
             }
+        }
+
+        public async Task<bool> FinalizeSale(System.Collections.Generic.List<BasketItem> basket)
+        {
+            try
+            {
+                var saleRequest = new
+                {
+                    items = basket.Select(b => new { barcode = b.Barcode, quantity = b.Quantity }).ToList()
+                };
+                var response = await _httpClient.PostAsJsonAsync($"{ip}/api/products/sale", saleRequest, _jsonOptions);
+                return response.IsSuccessStatusCode;
+            }
+            catch { return false; }
         }
     }
 }
