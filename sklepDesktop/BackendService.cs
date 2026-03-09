@@ -11,7 +11,7 @@ namespace sklepDesktop
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
-        private string ip = "http://192.168.0.56:8080";
+        private string ip = "http://127.0.0.1:8080";
 
         public BackendService()
         {
@@ -191,21 +191,20 @@ namespace sklepDesktop
         }
 
 
-        // --- OBSŁUGA BLIK (Port 8082) ---
-        private readonly string blikServerUrl = "http://localhost:8082/api/blik";
+        // --- OBSŁUGA BLIK POPRZEZ Backend Kasy (Port 8080) ---
 
         public async Task<string> InitiateBlikPayment(string code, decimal amount, string storeName)
         {
-            using (HttpClient blikClient = new HttpClient())
+            using (HttpClient client = new HttpClient())
             {
                 try
                 {
-                    // Zamieniamy przecinek na kropkę dla formatu URL
                     string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    string url = $"{blikServerUrl}/initiate?code={code}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
+                    // Uderzamy pod adres naszego Sklepu (ip = np. http://192.168.0.14:8080)
+                    string url = $"{ip}/api/products/blik/initiate?code={code}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
 
-                    var response = await blikClient.PostAsync(url, null);
-                    return await response.Content.ReadAsStringAsync(); // Zwróci "PENDING" lub komunikat błędu
+                    var response = await client.PostAsync(url, null);
+                    return await response.Content.ReadAsStringAsync();
                 }
                 catch (Exception ex)
                 {
@@ -216,18 +215,17 @@ namespace sklepDesktop
 
         public async Task<string> CheckBlikStatus(string code)
         {
-            using (HttpClient blikClient = new HttpClient())
+            using (HttpClient client = new HttpClient())
             {
                 try
                 {
-                    string url = $"{blikServerUrl}/status/{code}";
-                    var response = await blikClient.GetAsync(url);
+                    // Uderzamy do naszego Sklepu
+                    string url = $"{ip}/api/products/blik/status/{code}";
+                    var response = await client.GetAsync(url);
 
                     if (response.IsSuccessStatusCode)
-                    {
                         return await response.Content.ReadAsStringAsync();
-                        // Zwróci np. "PENDING_AUTHORIZATION", "COMPLETED", "REJECTED", "FAILED"
-                    }
+
                     return "ERROR";
                 }
                 catch
