@@ -189,5 +189,52 @@ namespace sklepDesktop
             }
             catch { return false; }
         }
+
+
+        // --- OBSŁUGA BLIK (Port 8082) ---
+        private readonly string blikServerUrl = "http://localhost:8082/api/blik";
+
+        public async Task<string> InitiateBlikPayment(string code, decimal amount, string storeName)
+        {
+            using (HttpClient blikClient = new HttpClient())
+            {
+                try
+                {
+                    // Zamieniamy przecinek na kropkę dla formatu URL
+                    string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                    string url = $"{blikServerUrl}/initiate?code={code}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
+
+                    var response = await blikClient.PostAsync(url, null);
+                    return await response.Content.ReadAsStringAsync(); // Zwróci "PENDING" lub komunikat błędu
+                }
+                catch (Exception ex)
+                {
+                    return $"BŁĄD SIECI: {ex.Message}";
+                }
+            }
+        }
+
+        public async Task<string> CheckBlikStatus(string code)
+        {
+            using (HttpClient blikClient = new HttpClient())
+            {
+                try
+                {
+                    string url = $"{blikServerUrl}/status/{code}";
+                    var response = await blikClient.GetAsync(url);
+
+                    if (response.IsSuccessStatusCode)
+                    {
+                        return await response.Content.ReadAsStringAsync();
+                        // Zwróci np. "PENDING_AUTHORIZATION", "COMPLETED", "REJECTED", "FAILED"
+                    }
+                    return "ERROR";
+                }
+                catch
+                {
+                    return "ERROR";
+                }
+            }
+        }
     }
 }

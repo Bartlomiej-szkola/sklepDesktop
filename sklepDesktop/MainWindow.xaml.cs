@@ -378,20 +378,45 @@ namespace sklepDesktop
         // 3. Finalizacja sprzedaży
         private async void BtnFinalizeSale_Click(object sender, RoutedEventArgs e)
         {
-            if (Basket.Count == 0) return;
-
-            bool success = await _service.FinalizeSale(Basket.ToList());
-
-            if (success)
+            if (Basket.Count == 0)
             {
-                MessageBox.Show("Sprzedaż zakończona pomyślnie!", "KASA");
-                Basket.Clear();
-                UpdateTotal();
-                LblCashierStatus.Text = "Zeskanuj produkt...";
+                MessageBox.Show("Koszyk jest pusty!");
+                return;
+            }
+
+            decimal totalAmount = Basket.Sum(item => item.Total);
+
+            // KROK 1: Wywołujemy terminal płatniczy
+            BlikWindow blikTerminal = new BlikWindow(_service, totalAmount);
+            blikTerminal.Owner = this; // Wyświetla okno na środku głównego ekranu
+
+            // Kod czeka tutaj, dopóki okienko BLIKa się nie zamknie
+            bool? paymentResult = blikTerminal.ShowDialog();
+
+            // KROK 2: Jeśli płatność się powiodła (zwrócono true)
+            if (paymentResult == true)
+            {
+                // Pieniądze są już pobrane z Banku Niebieskiego przez serwer BLIK.
+                // Teraz aktualizujemy stany magazynowe w Sklepie.
+                bool storeUpdated = await _service.FinalizeSale(Basket.ToList());
+
+                if (storeUpdated)
+                {
+                    MessageBox.Show("PARAGON WYDRUKOWANY. Dziękujemy za zakupy!", "Sukces");
+                    Basket.Clear();
+                    UpdateTotal();
+                    LblCashierStatus.Text = "Zeskanuj produkt...";
+                }
+                else
+                {
+                    // Płatność przeszła, ale padł serwer sklepowy
+                    MessageBox.Show("UWAGA: Płatność pobrana, ale wystąpił błąd z aktualizacją bazy sklepu!", "Krytyczny Błąd");
+                }
             }
             else
             {
-                MessageBox.Show("BŁĄD: Nie udało się sfinalizować sprzedaży. Sprawdź stany magazynowe.", "BŁĄD");
+                // Klient zamknął terminal albo anulował płatność
+                MessageBox.Show("Płatność anulowana. Możesz kontynuować dodawanie do koszyka.", "Kasa");
             }
         }
 
@@ -409,5 +434,9 @@ namespace sklepDesktop
                 UpdateTotal();
             }
         }
+
+
+
+
     }
 }
