@@ -11,7 +11,7 @@ namespace sklepDesktop
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
-        private string ip = "http://127.0.0.1:8080";
+        private string ip = "http://192.168.0.101:8080";
 
         public BackendService()
         {
@@ -200,7 +200,7 @@ namespace sklepDesktop
                 try
                 {
                     string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    // Uderzamy pod adres naszego Sklepu (ip = np. http://192.168.0.14:8080)
+                    // Uderzamy pod adres naszego Sklepu (ip = np. http://192.168.0.101:8080)
                     string url = $"{ip}/api/products/blik/initiate?code={code}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
 
                     var response = await client.PostAsync(url, null);
@@ -233,6 +233,50 @@ namespace sklepDesktop
                     return "ERROR";
                 }
             }
+        }
+
+        // --- OBSŁUGA TERMINALA KART ---
+
+        public class TerminalStateDto
+        {
+            public string Status { get; set; }
+            public decimal Amount { get; set; }
+            public string CardUid { get; set; }
+        }
+
+        public async Task<bool> InitiateTerminalPayment(decimal amount)
+        {
+            string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            var response = await _httpClient.PostAsync($"{ip}/api/terminal/initiate?amount={amountStr}", null);
+            return response.IsSuccessStatusCode;
+        }
+
+        public async Task<TerminalStateDto> CheckTerminalStatus()
+        {
+            try
+            {
+                return await _httpClient.GetFromJsonAsync<TerminalStateDto>($"{ip}/api/terminal/status", _jsonOptions);
+            }
+            catch { return null; }
+        }
+
+        public async Task<string> ProcessCardPayment(string cardUid, decimal amount, string storeName)
+        {
+            try
+            {
+                string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
+                string url = $"{ip}/api/products/card/charge?cardUid={cardUid}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
+                var response = await _httpClient.PostAsync(url, null);
+
+                if (response.IsSuccessStatusCode) return "SUCCESS";
+                return await response.Content.ReadAsStringAsync(); // Zwraca błąd banku
+            }
+            catch { return "BŁĄD SIECI"; }
+        }
+
+        public async Task ClearTerminal()
+        {
+            await _httpClient.PostAsync($"{ip}/api/terminal/clear", null);
         }
     }
 }

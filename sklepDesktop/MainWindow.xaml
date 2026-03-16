@@ -237,11 +237,10 @@
 							<TextBlock Name="LblTotalSum" Text="0,00 PLN" Foreground="#00FF00"
 									   HorizontalAlignment="Center" FontSize="48" FontWeight="Bold" Margin="0,10"/>
 
-							<Button Content="ZATWIERDŹ I PŁAĆ" Height="80" FontSize="22" FontWeight="Bold"
-									Background="#007ACC" Foreground="White" Margin="0,30,0,0"
-									Click="BtnFinalizeSale_Click"/>
+                            <Button Content="PŁAĆ BLIK" Background="#000" Foreground="White" Height="40" Margin="0,30,0,5" Click="BtnFinalizeSale_Click"/>
+                            <Button Content="PŁAĆ KARTĄ (Terminal)" Background="#007ACC" Foreground="White" Height="40" Margin="0,0,0,0" Click="BtnPayCard_Click"/>
 
-							<Button Content="USUŃ OSTATNI" Background="#444" Foreground="White"
+                            <Button Content="USUŃ OSTATNI" Background="#444" Foreground="White"
 									Margin="0,20,0,0" Click="BtnRemoveLast_Click"/>
 							<Button Content="ANULUJ KOSZYK" Background="#600" Foreground="White"
 									Margin="0,10,0,0" Click="BtnClearBasket_Click"/>

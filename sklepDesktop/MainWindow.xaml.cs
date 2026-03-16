@@ -420,6 +420,33 @@ namespace sklepDesktop
             }
         }
 
+        private async void BtnPayCard_Click(object sender, RoutedEventArgs e)
+        {
+            if (Basket.Count == 0) return;
+
+            decimal totalAmount = Basket.Sum(item => item.Total);
+
+            // Wywołujemy terminal w WPF (który wybudza telefon)
+            CardWindow cardTerminal = new CardWindow(_service, totalAmount);
+            cardTerminal.Owner = this;
+
+            bool? paymentResult = cardTerminal.ShowDialog();
+
+            if (paymentResult == true)
+            {
+                // Aktualizujemy stany magazynowe w Sklepie
+                bool storeUpdated = await _service.FinalizeSale(Basket.ToList());
+
+                if (storeUpdated)
+                {
+                    MessageBox.Show("PARAGON WYDRUKOWANY. Dziękujemy za zakupy kartą!", "Sukces");
+                    Basket.Clear();
+                    UpdateTotal();
+                    LblCashierStatus.Text = "Zeskanuj produkt...";
+                }
+            }
+        }
+
         // 4. Funkcje pomocnicze
         private void BtnRemoveLast_Click(object sender, RoutedEventArgs e)
         {
