@@ -11,7 +11,7 @@ namespace sklepDesktop
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
-        private string ip = "http://192.168.0.101:8080";
+        private string ip = Config.StoreBackendUrl;
 
         public BackendService()
         {
@@ -36,7 +36,7 @@ namespace sklepDesktop
                 try
                 {
                     // Adres zewnętrznego API
-                    string url = $"https://api.zdrowezakupy.org/api/2.0/product/{barcode}";
+                    string url = $"{Config.ZdroweZakupyUrl}/{barcode}";
 
                     var response = await externalClient.GetAsync(url);
 
@@ -200,7 +200,7 @@ namespace sklepDesktop
                 try
                 {
                     string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    // Uderzamy pod adres naszego Sklepu (ip = np. http://192.168.0.101:8080)
+                    // Uderzamy pod adres naszego Sklepu
                     string url = $"{ip}/api/products/blik/initiate?code={code}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
 
                     var response = await client.PostAsync(url, null);
