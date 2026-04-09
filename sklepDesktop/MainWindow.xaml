@@ -1,257 +1,312 @@
 ﻿<Window x:Class="sklepDesktop.MainWindow"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        Title="Sklep WPF - Klient" Height="450" Width="800">
+        Title="Sklep WPF - Klient" Height="700" Width="1100" WindowState="Maximized" 
+        Background="#F0F3F5" FontFamily="Segoe UI">
+    <Window.Resources>
+        <Style TargetType="Button">
+            <Setter Property="Background" Value="#455A64"/>
+            <Setter Property="Foreground" Value="White"/>
+            <Setter Property="Padding" Value="15,8"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="4"/>
+                </Style>
+            </Style.Resources>
+            <Style.Triggers>
+                <Trigger Property="IsMouseOver" Value="True">
+                    <Setter Property="Background" Value="#37474F"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
+
+        <Style TargetType="TextBox">
+            <Setter Property="Margin" Value="0,5,0,15"/>
+            <Setter Property="Padding" Value="8,5"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="BorderBrush" Value="#90A4AE"/>
+            <Setter Property="BorderThickness" Value="1.5"/>
+            <Setter Property="Background" Value="White"/>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="4"/>
+                </Style>
+            </Style.Resources>
+        </Style>
+
+        <Style TargetType="Label">
+            <Setter Property="Foreground" Value="#212121"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="Padding" Value="0,0,0,2"/>
+        </Style>
+
+        <Style TargetType="TabControl">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+        </Style>
+
+        <Style TargetType="TabItem">
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="Padding" Value="20,10"/>
+            <Setter Property="Foreground" Value="#546E7A"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TabItem">
+                        <Border Name="Border" BorderThickness="0,0,0,3" Margin="0,0,10,0">
+                            <ContentPresenter x:Name="ContentSite" ContentSource="Header" Margin="12,2"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="BorderBrush" Value="#1976D2"/>
+                                <Setter Property="Foreground" Value="#1976D2"/>
+                                <Setter Property="FontWeight" Value="Bold"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style TargetType="GroupBox">
+            <Setter Property="Margin" Value="10"/>
+            <Setter Property="Padding" Value="15"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="HeaderTemplate">
+                <Setter.Value>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding}" FontWeight="Bold" FontSize="16" Foreground="#212121" Margin="0,0,0,15"/>
+                    </DataTemplate>
+                </Setter.Value>
+            </Setter>
+            <Style.Resources>
+                <Style TargetType="Border">
+                    <Setter Property="CornerRadius" Value="8"/>
+                    <Setter Property="Effect">
+                        <Setter.Value>
+                            <DropShadowEffect BlurRadius="12" ShadowDepth="2" Opacity="0.1" Color="Black"/>
+                        </Setter.Value>
+                    </Setter>
+                </Style>
+            </Style.Resources>
+        </Style>
+
+        <Style TargetType="DataGrid">
+            <Setter Property="Background" Value="White"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="BorderBrush" Value="#CFD8DC"/>
+            <Setter Property="GridLinesVisibility" Value="None"/>
+            <Setter Property="RowHeight" Value="38"/>
+            <Setter Property="ColumnHeaderStyle">
+                <Setter.Value>
+                    <Style TargetType="DataGridColumnHeader">
+                        <Setter Property="Background" Value="#ECEFF1"/>
+                        <Setter Property="Foreground" Value="#212121"/>
+                        <Setter Property="FontWeight" Value="Bold"/>
+                        <Setter Property="Padding" Value="10,5"/>
+                        <Setter Property="BorderThickness" Value="0,0,1,1"/>
+                        <Setter Property="BorderBrush" Value="#CFD8DC"/>
+                    </Style>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
     <Grid>
         <TabControl>
-            <!-- ZAKŁADKA 1: OBSŁUGA I DODAWANIE (To co już masz) -->
             <TabItem Header="Sprzedaż i Dodawanie">
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="15" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- LEWA STRONA: SKANOWANIE -->
                     <GroupBox Header="Skaner / Sprzedaż" Grid.Column="0">
-                        <StackPanel Margin="10">
-                            <Label Content="Zeskanuj kod kreskowy:" FontWeight="Bold"/>
-                            <!-- KeyDown="TxtScan_KeyDown" to klucz do obsługi skanera! -->
-                            <TextBox Name="TxtScan" Height="30" FontSize="16" KeyDown="TxtScan_KeyDown"/>
-
-                            <Button Content="Szukaj (Manualnie)" Margin="0,5,0,20" Click="BtnSearch_Click"/>
-
-                            <Border BorderBrush="Gray" BorderThickness="1" Padding="10" Background="#F0F0F0">
+                        <StackPanel Margin="5">
+                            <Label Content="Zeskanuj kod kreskowy:"/>
+                            <TextBox Name="TxtScan" Height="45" FontSize="20" FontWeight="Bold" KeyDown="TxtScan_KeyDown" BorderBrush="#1976D2" BorderThickness="2"/>
+                            <Button Content="Szukaj (Manualnie)" Margin="0,-5,0,25" Height="35" Click="BtnSearch_Click"/>
+                            <Border BorderBrush="#CFD8DC" BorderThickness="1" Padding="20" Background="#FFFDE7" CornerRadius="8">
                                 <StackPanel>
-                                    <TextBlock Text="Wynik skanowania:" FontWeight="Bold"/>
-                                    <TextBlock Name="LblResultName" Text="Nazwa: -" FontSize="18" Margin="0,10,0,0"/>
-                                    <TextBlock Name="LblResultPrice" Text="Cena: -" FontSize="24" FontWeight="Bold" Foreground="Green"/>
-                                    <TextBlock Name="LblResultDesc" Text="Opis: -" FontStyle="Italic"/>
-                                    <TextBlock Name="LblResultStock" Text="Stan: -"/>
+                                    <TextBlock Text="Wynik skanowania:" FontWeight="Bold" Foreground="#546E7A" Margin="0,0,0,12"/>
+                                    <TextBlock Name="LblResultName" Text="Nazwa: -" FontSize="22" Foreground="#212121" FontWeight="SemiBold"/>
+                                    <TextBlock Name="LblResultPrice" Text="Cena: -" FontSize="40" FontWeight="Bold" Foreground="#1B5E20" Margin="0,8"/>
+                                    <TextBlock Name="LblResultDesc" Text="Opis: -" FontStyle="Italic" Foreground="#424242" Margin="0,0,0,8"/>
+                                    <TextBlock Name="LblResultStock" Text="Stan: -" Foreground="#212121" FontSize="14" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </GroupBox>
 
-                    <!-- PRAWA STRONA: DODAWANIE -->
                     <GroupBox Header="Dodaj nowy towar" Grid.Column="2">
-                        <StackPanel Margin="10">
+                        <StackPanel Margin="5">
                             <Label Content="Kod kreskowy:"/>
-                            <TextBox Name="TxtNewBarcode" KeyDown="TxtNewBarcode_KeyDown"/>
+                            <TextBox Name="TxtNewBarcode" Height="30" KeyDown="TxtNewBarcode_KeyDown"/>
 
-                            <!-- Status pobierania z API zewnętrznego -->
-                            <TextBlock Name="LblExternalStatus" Text="" Foreground="Orange" FontSize="10" Margin="0,2,0,5"/>
-
+                            <TextBlock Name="LblExternalStatus" Text="" Foreground="#E65100" FontSize="11" Margin="0,-12,0,12" FontWeight="SemiBold"/>
                             <Label Content="Nazwa:"/>
-                            <TextBox Name="TxtNewName"/>
+                            <TextBox Name="TxtNewName" Height="30"/>
 
                             <Label Content="Opis:"/>
-                            <TextBox Name="TxtNewDesc"/>
+                            <TextBox Name="TxtNewDesc" Height="30"/>
 
                             <Label Content="Cena (np. 12,99):"/>
-                            <TextBox Name="TxtNewPrice"/>
+                            <TextBox Name="TxtNewPrice" Height="30"/>
 
                             <Label Content="Ilość na stanie:"/>
-                            <TextBox Name="TxtNewQty"/>
+                            <TextBox Name="TxtNewQty" Height="30"/>
 
-                            <Button Content="Zapisz w bazie" Margin="0,20,0,0" Height="30" Background="#DDDDFF" Click="BtnAdd_Click"/>
-                            <TextBlock Name="LblStatus" Foreground="Blue" Margin="0,10,0,0" TextWrapping="Wrap"/>
+                            <Button Content="ZAPISZ W BAZIE" Margin="0,15,0,0" Height="50" Click="BtnAdd_Click" Background="#1565C0" Foreground="White" FontSize="16" FontWeight="Bold"/>
+                            <TextBlock Name="LblStatus" Foreground="#1976D2" Margin="0,15,0,0" TextWrapping="Wrap" TextAlignment="Center" FontWeight="Bold" FontSize="14"/>
                         </StackPanel>
                     </GroupBox>
                 </Grid>
             </TabItem>
 
-            <!-- ZAKŁADKA 2: AKTUALIZACJA PRODUKTU (Nowy Panel - układ dwukolumnowy) -->
             <TabItem Header="Edycja Produktu">
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <!-- Kolumna lewa: Skanowanie -->
-                        <ColumnDefinition Width="20" />
-                        <!-- Odstęp między kolumnami -->
+                        <ColumnDefinition Width="15" />
                         <ColumnDefinition Width="*" />
-                        <!-- Kolumna prawa: Edycja danych -->
                     </Grid.ColumnDefinitions>
 
-                    <!-- LEWA STRONA: SKANOWANIE DO EDYCJI -->
-                    <GroupBox Header="Krok 1: Zeskanuj produkt do edycji" Grid.Column="0" VerticalAlignment="Top">
-                        <StackPanel Margin="10">
-                            <Label Content="Zeskanuj kod towaru:" FontWeight="Bold"/>
+                    <GroupBox Header="Krok 1: Zeskanuj do edycji" Grid.Column="0" VerticalAlignment="Top">
+                        <StackPanel Margin="5">
+                            <Label Content="Zeskanuj kod towaru:"/>
                             <TextBox Name="TxtUpdateSearchBarcode" 
-                         Height="35" 
-                         FontSize="18" 
-                         VerticalContentAlignment="Center"
-                         KeyDown="TxtUpdateSearchBarcode_KeyDown"/>
+                                 Height="45" 
+                                 FontSize="20" 
+                                 FontWeight="Bold"
+                                 KeyDown="TxtUpdateSearchBarcode_KeyDown" BorderBrush="#1976D2" BorderThickness="2"/>
 
-                            <Border Margin="0,15,0,0" Padding="10" Background="#FFF9F0" BorderBrush="#FFE4B5" BorderThickness="1">
-                                <StackPanel>
+                            <Border Margin="0,10,0,0" Padding="15" Background="#E3F2FD" BorderBrush="#90CAF9" BorderThickness="1" CornerRadius="6">
+                                <StackPanel Orientation="Horizontal">
+                                    <TextBlock Text="ℹ️" Margin="0,0,12,0" VerticalAlignment="Center" FontSize="16"/>
                                     <TextBlock Name="LblUpdateSearchStatus" 
-                                   Text="Czekam na skanowanie..." 
-                                   TextWrapping="Wrap" 
-                                   FontSize="14" 
-                                   Foreground="Gray"/>
+                                           Text="Czekam na skanowanie..." 
+                                           TextWrapping="Wrap" 
+                                           FontSize="14" 
+                                           Foreground="#1565C0" VerticalAlignment="Center" FontWeight="SemiBold"/>
                                 </StackPanel>
                             </Border>
-
-                            <TextBlock Text="Wskazówka: Po zeskanowaniu dane pojawią się w panelu po prawej stronie." 
-                           Margin="0,20,0,0" 
-                           Foreground="DarkGray" 
-                           FontStyle="Italic" 
-                           TextWrapping="Wrap"/>
                         </StackPanel>
                     </GroupBox>
 
-                    <!-- PRAWA STRONA: FORMULARZ EDYCJI -->
-                    <GroupBox Header="Krok 2: Edytuj dane produktu" 
-                  Grid.Column="2" 
-                  Name="GroupEditFields" 
-                  IsEnabled="False">
+                    <GroupBox Header="Krok 2: Edytuj dane" Grid.Column="2" Name="GroupEditFields" IsEnabled="False">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
-                            <StackPanel Margin="10">
+                            <StackPanel Margin="5">
                                 <Label Content="Nazwa produktu:"/>
-                                <TextBox Name="TxtUpdateName" Height="25" Margin="0,0,0,10"/>
+                                <TextBox Name="TxtUpdateName" Height="30"/>
 
                                 <Label Content="Opis:"/>
-                                <TextBox Name="TxtUpdateDesc" 
-                             Height="60" 
-                             AcceptsReturn="True" 
-                             TextWrapping="Wrap" 
-                             Margin="0,0,0,10"/>
+                                <TextBox Name="TxtUpdateDesc" Height="80" AcceptsReturn="True" TextWrapping="Wrap"/>
 
                                 <Grid>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="10"/>
+                                        <ColumnDefinition Width="15"/>
                                         <ColumnDefinition Width="*"/>
                                     </Grid.ColumnDefinitions>
-
                                     <StackPanel Grid.Column="0">
                                         <Label Content="Cena (PLN):"/>
-                                        <TextBox Name="TxtUpdatePrice" Height="25"/>
+                                        <TextBox Name="TxtUpdatePrice" Height="30"/>
                                     </StackPanel>
-
                                     <StackPanel Grid.Column="2">
                                         <Label Content="Ilość na stanie:"/>
-                                        <TextBox Name="TxtUpdateQty" Height="25"/>
+                                        <TextBox Name="TxtUpdateQty" Height="30"/>
                                     </StackPanel>
                                 </Grid>
 
-                                <Button Content="Zapisz zmiany (Update)" 
-                            Margin="0,30,0,10" 
-                            Height="45" 
-                            FontSize="16"
-                            FontWeight="Bold"
-                            Background="#E1F5FE" 
-                            Click="BtnUpdateSave_Click"/>
-
-                                <TextBlock Name="LblUpdateResult" 
-                               FontSize="14" 
-                               FontWeight="Bold" 
-                               TextAlignment="Center" 
-                               Margin="0,5,0,0"/>
+                                <Button Content="ZAPISZ ZMIANY (Update)" Margin="0,25,0,10" Height="55" FontSize="17" Click="BtnUpdateSave_Click" Background="#2E7D32" Foreground="White" FontWeight="Bold"/>
+                                <TextBlock Name="LblUpdateResult" FontSize="15" FontWeight="Bold" TextAlignment="Center" Margin="0,5,0,0"/>
                             </StackPanel>
                         </ScrollViewer>
                     </GroupBox>
                 </Grid>
             </TabItem>
 
-            <!-- ZAKŁADKA 3: DOSTAWY -->
             <TabItem Header="Dostawa (Przyjęcie)">
                 <Grid Margin="10">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
-                        <ColumnDefinition Width="20" />
+                        <ColumnDefinition Width="15" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- LEWA STRONA: SKANOWANIE DOSTAWY -->
-                    <GroupBox Header="Krok 1: Zeskanuj przywieziony towar" Grid.Column="0" VerticalAlignment="Top">
-                        <StackPanel Margin="10">
-                            <Label Content="Kod kreskowy:" FontWeight="Bold"/>
-                            <TextBox Name="TxtDeliveryBarcode" Height="35" FontSize="18" VerticalContentAlignment="Center" KeyDown="TxtDeliveryBarcode_KeyDown"/>
+                    <GroupBox Header="Krok 1: Zeskanuj towar" Grid.Column="0" VerticalAlignment="Top">
+                        <StackPanel Margin="5">
+                            <Label Content="Kod kreskowy:"/>
+                            <TextBox Name="TxtDeliveryBarcode" Height="45" FontSize="20" FontWeight="Bold" KeyDown="TxtDeliveryBarcode_KeyDown" BorderBrush="#1976D2" BorderThickness="2"/>
 
-                            <!-- STATUS SKANOWANIA (Zamiast MessageBox) -->
-                            <Border Margin="0,15,0,0" Padding="15" Background="#F8F9FA" BorderBrush="#DEE2E6" BorderThickness="1">
+                            <Border Margin="0,10,0,0" Padding="15" Background="#F5F5F5" BorderBrush="#CFD8DC" BorderThickness="1" CornerRadius="8">
                                 <StackPanel>
-                                    <TextBlock Name="LblDeliveryProdName" Text="Produkt: -" FontSize="16" FontWeight="Bold" Margin="0,0,0,5"/>
-                                    <TextBlock Name="LblDeliveryCurrentStock" Text="Obecny stan: -" FontSize="14" Foreground="Gray"/>
-                                    <TextBlock Name="LblDeliveryScanStatus" Text="Czekam na skan..." Margin="0,10,0,0" FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    <TextBlock Name="LblDeliveryProdName" Text="Produkt: -" FontSize="20" FontWeight="Bold" Foreground="#212121" Margin="0,0,0,8"/>
+                                    <TextBlock Name="LblDeliveryCurrentStock" Text="Obecny stan: -" FontSize="15" Foreground="#424242" FontWeight="SemiBold"/>
+                                    <TextBlock Name="LblDeliveryScanStatus" Text="Czekam na skan..." Margin="0,12,0,0" FontWeight="Bold" Foreground="#1976D2" FontSize="14"/>
                                 </StackPanel>
                             </Border>
                         </StackPanel>
                     </GroupBox>
 
-                    <!-- PRAWA STRONA: ILOŚĆ DOSTAWY -->
-                    <GroupBox Header="Krok 2: Ile sztuk dostarczono?" Grid.Column="2" Name="GroupDeliveryFields" IsEnabled="False">
-                        <StackPanel Margin="10">
+                    <GroupBox Header="Krok 2: Ilość dostawy" Grid.Column="2" Name="GroupDeliveryFields" IsEnabled="False">
+                        <StackPanel Margin="5">
                             <Label Content="Liczba nowych sztuk:"/>
-                            <TextBox Name="TxtDeliveryAmount" Height="40" FontSize="20" FontWeight="Bold" VerticalContentAlignment="Center" Margin="0,0,0,20"/>
-
-                            <Button Content="Zatwierdź dostawę (+)" Height="50" FontSize="18" FontWeight="Bold" Background="#4CAF50" Foreground="White" Click="BtnDeliverySave_Click"/>
-
-                            <!-- STATUS ZAPISU -->
-                            <TextBlock Name="LblDeliveryResult" FontSize="14" FontWeight="Bold" TextAlignment="Center" Margin="0,15,0,0" TextWrapping="Wrap"/>
+                            <TextBox Name="TxtDeliveryAmount" Height="70" FontSize="48" FontWeight="Bold" Margin="0,0,0,25" TextAlignment="Center" BorderBrush="#388E3C" BorderThickness="2.5" Foreground="#1B5E20"/>
+                            <Button Content="ZATWIERDŹ DOSTAWĘ (+)" Height="65" FontSize="20" FontWeight="Bold" Background="#2E7D32" Foreground="White" Click="BtnDeliverySave_Click"/>
+                            <TextBlock Name="LblDeliveryResult" FontSize="15" FontWeight="Bold" TextAlignment="Center" Margin="0,15,0,0"/>
                         </StackPanel>
                     </GroupBox>
                 </Grid>
             </TabItem>
-			
-			<!-- ZAKŁADKA 4 KASA-->
-			<TabItem Header="Kasa (POS)">
-				<Grid Margin="10">
-					<Grid.ColumnDefinitions>
-						<ColumnDefinition Width="2*" />
-						<!-- Lista produktów -->
-						<ColumnDefinition Width="*" />
-						<!-- Podsumowanie -->
-					</Grid.ColumnDefinitions>
 
-					<!-- LEWA STRONA: LISTA PRODUKTÓW (PARAGON) -->
-					<DockPanel Grid.Column="0" Margin="0,0,10,0">
-						<GroupBox Header="Skanowanie towaru" DockPanel.Dock="Top" Margin="0,0,0,10">
-							<StackPanel Orientation="Horizontal" Margin="5">
-								<Label Content="KOD:" VerticalAlignment="Center" FontWeight="Bold"/>
-								<TextBox Name="TxtCashierScan" Width="300" Height="40" FontSize="20"
-										 VerticalContentAlignment="Center" KeyDown="TxtCashierScan_KeyDown"/>
-								<TextBlock Name="LblCashierStatus" Text="Zeskanuj produkt..."
-										   VerticalAlignment="Center" Margin="15,0,0,0" Foreground="Gray"/>
-							</StackPanel>
-						</GroupBox>
+            <TabItem Header="Kasa (POS)">
+                <Grid Margin="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="2*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
 
-						<DataGrid Name="DgBasket" AutoGenerateColumns="False" IsReadOnly="True" FontSize="16"
-								  ItemsSource="{Binding Basket}">
-							<DataGrid.Columns>
-								<DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*" />
-								<DataGridTextColumn Header="Cena" Binding="{Binding Price, StringFormat={}{0:C}}" Width="100" />
-								<DataGridTextColumn Header="Ilość" Binding="{Binding Quantity}" Width="80" />
-								<DataGridTextColumn Header="Suma" Binding="{Binding Total, StringFormat={}{0:C}}" Width="100" />
-							</DataGrid.Columns>
-						</DataGrid>
-					</DockPanel>
+                    <DockPanel Grid.Column="0" Margin="0,0,15,0">
+                        <GroupBox Header="Skanowanie towaru" DockPanel.Dock="Top" Margin="0,0,0,15">
+                            <StackPanel Orientation="Horizontal" Margin="5">
+                                <Label Content="KOD:" VerticalAlignment="Center" Margin="0,0,12,0" FontSize="16"/>
+                                <TextBox Name="TxtCashierScan" Width="320" Height="50" FontSize="24" FontWeight="Bold" KeyDown="TxtCashierScan_KeyDown" BorderBrush="#1976D2" BorderThickness="2.5" Margin="0"/>
+                                <TextBlock Name="LblCashierStatus" Text="Zeskanuj produkt..." VerticalAlignment="Center" Margin="25,0,0,0" Foreground="#607D8B" FontSize="15" FontWeight="SemiBold"/>
+                            </StackPanel>
+                        </GroupBox>
 
-					<!-- PRAWA STRONA: PODSUMOWANIE -->
-					<Border Grid.Column="1" Background="#222" CornerRadius="10" Padding="20">
-						<StackPanel VerticalAlignment="Center">
-							<TextBlock Text="DO ZAPŁATY" Foreground="White" HorizontalAlignment="Center" FontSize="20"/>
-							<TextBlock Name="LblTotalSum" Text="0,00 PLN" Foreground="#00FF00"
-									   HorizontalAlignment="Center" FontSize="48" FontWeight="Bold" Margin="0,10"/>
+                        <DataGrid Name="DgBasket" AutoGenerateColumns="False" IsReadOnly="True" FontSize="17" ItemsSource="{Binding Basket}" HeadersVisibility="Column">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Nazwa" Binding="{Binding Name}" Width="*" />
+                                <DataGridTextColumn Header="Cena" Binding="{Binding Price, StringFormat={}{0:C}}" Width="130" />
+                                <DataGridTextColumn Header="Ilość" Binding="{Binding Quantity}" Width="90" />
+                                <DataGridTextColumn Header="Suma" Binding="{Binding Total, StringFormat={}{0:C}}" Width="130" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </DockPanel>
 
-                            <Button Content="PŁAĆ BLIK" Background="#000" Foreground="White" Height="40" Margin="0,30,0,5" Click="BtnFinalizeSale_Click"/>
-                            <Button Content="PŁAĆ KARTĄ (Terminal)" Background="#007ACC" Foreground="White" Height="40" Margin="0,0,0,0" Click="BtnPayCard_Click"/>
+                    <Border Grid.Column="1" Background="White" CornerRadius="12" Padding="30">
+                        <Border.Effect>
+                            <DropShadowEffect BlurRadius="20" ShadowDepth="3" Opacity="0.12" Color="Black"/>
+                        </Border.Effect>
 
-                            <Button Content="USUŃ OSTATNI" Background="#444" Foreground="White"
-									Margin="0,20,0,0" Click="BtnRemoveLast_Click"/>
-							<Button Content="ANULUJ KOSZYK" Background="#600" Foreground="White"
-									Margin="0,10,0,0" Click="BtnClearBasket_Click"/>
-						</StackPanel>
-					</Border>
-				</Grid>
-			</TabItem>
+                        <StackPanel VerticalAlignment="Center">
+                            <TextBlock Text="DO ZAPŁATY" Foreground="#616161" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold"/>
+                            <TextBlock Name="LblTotalSum" Text="0,00 PLN" Foreground="#1B5E20" HorizontalAlignment="Center" FontSize="72" FontWeight="Bold" Margin="0,8,0,35"/>
+                            <Button Content="PŁAĆ BLIK" Background="#D32F2F" Foreground="White" Height="60" FontSize="18" FontWeight="Bold" Margin="0,5" Click="BtnFinalizeSale_Click"/>
+                            <Button Content="PŁAĆ KARTĄ" Background="#1976D2" Foreground="White" Height="60" FontSize="18" FontWeight="Bold" Margin="0,5" Click="BtnPayCard_Click"/>
+                            <Separator Background="#CFD8DC" Margin="0,30"/>
 
+                            <Button Content="USUŃ OSTATNI" Height="45" Margin="0,5" Click="BtnRemoveLast_Click" FontSize="14"/>
+                            <Button Content="ANULUJ KOSZYK" Background="Transparent" BorderThickness="2" BorderBrush="#D32F2F" Foreground="#B71C1C" Height="45" Margin="0,5" Click="BtnClearBasket_Click" FontSize="14" FontWeight="Bold"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
         </TabControl>
     </Grid>
-    
-    
-    
 </Window>
