@@ -1,7 +1,9 @@
-﻿using System;
+using System;
+using System.IO;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text.Json;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 
@@ -242,6 +244,7 @@ namespace sklepDesktop
             public string Status { get; set; }
             public decimal Amount { get; set; }
             public string CardUid { get; set; }
+            public string Pin { get; set; }
         }
 
         public async Task<bool> InitiateTerminalPayment(decimal amount)
@@ -249,6 +252,102 @@ namespace sklepDesktop
             string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
             var response = await _httpClient.PostAsync($"{ip}/api/terminal/initiate?amount={amountStr}", null);
             return response.IsSuccessStatusCode;
+        }
+
+        // --- WEBHOOK: Stateless push od backendu ---
+
+        private System.Net.HttpListener _webhookListener;
+        private string _webhookUrl;
+
+        public string StartWebhookListener(int port)
+        {
+            _webhookUrl = $"http://+:{port}/webhook/";
+            _webhookListener = new System.Net.HttpListener();
+            _webhookListener.Prefixes.Add(_webhookUrl);
+            _webhookListener.Start();
+
+            // Zwracamy URL do rejestracji (z prawdziwym IP, nie "+")
+            string localIp = GetLocalIp();
+            return $"http://{localIp}:{port}/webhook/";
+        }
+
+        public async Task ListenForWebhooks(Action<TerminalStateDto> onState, CancellationToken ct)
+        {
+            while (!ct.IsCancellationRequested && _webhookListener.IsListening)
+            {
+                try
+                {
+                    var context = await _webhookListener.GetContextAsync();
+                    if (context.Request.HttpMethod == "POST")
+                    {
+                        using (var reader = new StreamReader(context.Request.InputStream))
+                        {
+                            string body = await reader.ReadToEndAsync();
+                            try
+                            {
+                                var state = JsonSerializer.Deserialize<TerminalStateDto>(body, _jsonOptions);
+                                if (state != null) onState(state);
+                            }
+                            catch { /* ignoruj błędny JSON */ }
+                        }
+                    }
+
+                    // Odpowiadamy 200 OK
+                    context.Response.StatusCode = 200;
+                    context.Response.Close();
+                }
+                catch (ObjectDisposedException)
+                {
+                    break; // Listener zamknięty
+                }
+                catch (OperationCanceledException)
+                {
+                    break;
+                }
+            }
+        }
+
+        public void StopWebhookListener()
+        {
+            try
+            {
+                _webhookListener?.Stop();
+                _webhookListener?.Close();
+            }
+            catch { }
+        }
+
+        public async Task RegisterWebhook(string externalUrl)
+        {
+            await _httpClient.PostAsync($"{ip}/api/terminal/registerWebhook?url={Uri.EscapeDataString(externalUrl)}", null);
+        }
+
+        public async Task UnregisterWebhook(string externalUrl)
+        {
+            try
+            {
+                await _httpClient.PostAsync($"{ip}/api/terminal/unregisterWebhook?url={Uri.EscapeDataString(externalUrl)}", null);
+            }
+            catch { }
+        }
+
+        private string GetLocalIp()
+        {
+            foreach (var nic in System.Net.NetworkInformation.NetworkInterface.GetAllNetworkInterfaces())
+            {
+                if (nic.OperationalStatus == System.Net.NetworkInformation.OperationalStatus.Up &&
+                    nic.NetworkInterfaceType != System.Net.NetworkInformation.NetworkInterfaceType.Loopback)
+                {
+                    foreach (var addr in nic.GetIPProperties().UnicastAddresses)
+                    {
+                        if (addr.Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetwork)
+                        {
+                            return addr.Address.ToString();
+                        }
+                    }
+                }
+            }
+            return "localhost";
         }
 
         public async Task<TerminalStateDto> CheckTerminalStatus()
@@ -260,19 +359,28 @@ namespace sklepDesktop
             catch { return null; }
         }
 
-        public async Task<string> ProcessCardPayment(string cardUid, decimal amount, string storeName)
+        // Zaktualizowana metoda procesowania (dodany PIN)
+        public async Task<string> ProcessCardPayment(string cardUid, decimal amount, string storeName, string pin)
         {
             try
             {
                 string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 string url = $"{ip}/api/products/card/charge?cardUid={cardUid}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
+                if (!string.IsNullOrEmpty(pin)) url += $"&pin={pin}";
+
                 var response = await _httpClient.PostAsync(url, null);
 
                 if (response.IsSuccessStatusCode) return "SUCCESS";
-                return await response.Content.ReadAsStringAsync(); // Zwraca błąd banku
+                return await response.Content.ReadAsStringAsync(); // NP. "INVALID_PIN", "NO_FUNDS"
             }
-            catch { return "BŁĄD SIECI"; }
+            catch { return "ERROR_GENERAL"; }
         }
+        // Nowa metoda do wysłania werdyktu do telefonu
+        public async Task SetTerminalResult(string result)
+        {
+            await _httpClient.PostAsync($"{ip}/api/terminal/setResult?result={result}", null);
+        }
+
 
         public async Task ClearTerminal()
         {
