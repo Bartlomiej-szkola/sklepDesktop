@@ -9,7 +9,7 @@ namespace sklepDesktop
 {
     public static class Config
     {
-        public static string ServerIp = "172.31.114.133";
+        public static string ServerIp = "192.168.1.21";
         public static string StoreBackendUrl = $"http://{ServerIp}:8080";
         public static string ZdroweZakupyUrl = "https://api.zdrowezakupy.org/api/2.0/product";
     }
