@@ -260,12 +260,13 @@ namespace sklepDesktop
             catch { return null; }
         }
 
-        public async Task<string> ProcessCardPayment(string cardUid, decimal amount, string storeName)
+        public async Task<string> ProcessCardPayment(string cardUid, decimal amount, string storeName, string pin)
         {
             try
             {
                 string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
                 string url = $"{ip}/api/products/card/charge?cardUid={cardUid}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
+                if (!string.IsNullOrEmpty(pin)) url += $"&pin={pin}";
                 var response = await _httpClient.PostAsync(url, null);
 
                 if (response.IsSuccessStatusCode) return "SUCCESS";
