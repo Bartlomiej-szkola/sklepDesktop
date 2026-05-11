@@ -1,0 +1,23 @@
+﻿<Window x:Class="sklepDesktop.ServerConfigWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Ustawienia połączenia" Height="344" Width="350" 
+        WindowStartupLocation="CenterOwner" ResizeMode="NoResize" Background="#F5F5F5">
+    <StackPanel Margin="20">
+        <Label Content="Adres IP serwera:" FontWeight="Bold"/>
+        <TextBox Name="TxtIp" Height="30" VerticalContentAlignment="Center" Margin="0,0,0,10"/>
+
+        <Label Content="Port serwera:" FontWeight="Bold"/>
+        <TextBox Name="TxtPort" Height="30" VerticalContentAlignment="Center" Margin="0,0,0,15"/>
+
+        <Button Name="BtnTest" Content="Sprawdź połączenie" Height="35" Click="BtnTest_Click" 
+                Background="#607D8B" Foreground="White" FontWeight="SemiBold" Margin="0,0,0,10"/>
+
+        <TextBlock Name="LblTestStatus" Text="Czekam na test..." HorizontalAlignment="Center" Margin="0,0,0,15" FontWeight="SemiBold"/>
+
+        <UniformGrid Columns="2">
+            <Button Content="Zapisz" Height="40" Margin="0,0,5,0" Click="BtnSave_Click" Background="#455A64"  Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
+            <Button Content="Anuluj" Height="40" Margin="5,0,0,0" Click="BtnCancel_Click" Background="#9E9E9E"  Foreground="White" BorderThickness="0" FontWeight="SemiBold"/>
+        </UniformGrid>
+    </StackPanel>
+</Window>

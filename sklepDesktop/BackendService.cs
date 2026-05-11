@@ -11,13 +11,13 @@ namespace sklepDesktop
     {
         private readonly HttpClient _httpClient;
         private readonly JsonSerializerOptions _jsonOptions;
-        private string ip = Config.StoreBackendUrl;
+        // private string ip = Config.StoreBackendUrl;
 
         public BackendService()
         {
             _httpClient = new HttpClient();
             // ADRES TWOJEGO BACKENDU SPRINGOWEGO:
-            _httpClient.BaseAddress = new Uri(ip + "/api/products/");
+            _httpClient.BaseAddress = new Uri(Config.StoreBackendUrl + "/api/products/");
 
             // KONFIGURACJA JSON: To naprawia problem nulli w Javie!
             // Zamienia automatycznie Barcode -> barcode, StockQuantity -> stockQuantity
@@ -91,7 +91,7 @@ namespace sklepDesktop
             try
             {
                 // 1. Definiujemy pełny adres (żeby uniknąć błędu 404 ze slashem)
-                string url = ip + "/api/products";
+                string url = Config.StoreBackendUrl + "/api/products";
 
                 // 2. Tworzymy obiekt anonimowy BEZ pola Id.
                 // Wyślemy tylko to, co serwer akceptuje.
@@ -132,7 +132,7 @@ namespace sklepDesktop
             try
             {
                 // Adres: /api/products/update/123456
-                string url = $"{ip}/api/products/update/{barcode}";
+                string url = $"{Config.StoreBackendUrl}/api/products/update/{barcode}";
 
                 // Podobnie jak przy dodawaniu, wysyłamy obiekt bez ID
                 var dataToSend = new
@@ -166,7 +166,7 @@ namespace sklepDesktop
         {
             try
             {
-                string url = $"{ip}/api/products/addQuantity/{barcode}?amount={amount}";
+                string url = $"{Config.StoreBackendUrl}/api/products/addQuantity/{barcode}?amount={amount}";
                 var response = await _httpClient.PatchAsync(url, null);
                 return response.IsSuccessStatusCode;
             }
@@ -184,7 +184,7 @@ namespace sklepDesktop
                 {
                     items = basket.Select(b => new { barcode = b.Barcode, quantity = b.Quantity }).ToList()
                 };
-                var response = await _httpClient.PostAsJsonAsync($"{ip}/api/products/sale", saleRequest, _jsonOptions);
+                var response = await _httpClient.PostAsJsonAsync($"{Config.StoreBackendUrl}/api/products/sale", saleRequest, _jsonOptions);
                 return response.IsSuccessStatusCode;
             }
             catch { return false; }
@@ -201,7 +201,7 @@ namespace sklepDesktop
                 {
                     string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
                     // Uderzamy pod adres naszego Sklepu
-                    string url = $"{ip}/api/products/blik/initiate?code={code}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
+                    string url = $"{Config.StoreBackendUrl}/api/products/blik/initiate?code={code}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
 
                     var response = await client.PostAsync(url, null);
                     return await response.Content.ReadAsStringAsync();
@@ -220,7 +220,7 @@ namespace sklepDesktop
                 try
                 {
                     // Uderzamy do naszego Sklepu
-                    string url = $"{ip}/api/products/blik/status/{code}";
+                    string url = $"{Config.StoreBackendUrl}/api/products/blik/status/{code}";
                     var response = await client.GetAsync(url);
 
                     if (response.IsSuccessStatusCode)
@@ -247,7 +247,7 @@ namespace sklepDesktop
         public async Task<bool> InitiateTerminalPayment(decimal amount)
         {
             string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
-            var response = await _httpClient.PostAsync($"{ip}/api/terminal/initiate?amount={amountStr}", null);
+            var response = await _httpClient.PostAsync($"{Config.StoreBackendUrl}/api/terminal/initiate?amount={amountStr}", null);
             return response.IsSuccessStatusCode;
         }
 
@@ -255,7 +255,7 @@ namespace sklepDesktop
         {
             try
             {
-                return await _httpClient.GetFromJsonAsync<TerminalStateDto>($"{ip}/api/terminal/status", _jsonOptions);
+                return await _httpClient.GetFromJsonAsync<TerminalStateDto>($"{Config.StoreBackendUrl}/api/terminal/status", _jsonOptions);
             }
             catch { return null; }
         }
@@ -265,7 +265,7 @@ namespace sklepDesktop
             try
             {
                 string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                string url = $"{ip}/api/products/card/charge?cardUid={cardUid}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
+                string url = $"{Config.StoreBackendUrl}/api/products/card/charge?cardUid={cardUid}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
                 if (!string.IsNullOrEmpty(pin)) url += $"&pin={pin}";
                 var response = await _httpClient.PostAsync(url, null);
 
@@ -277,7 +277,24 @@ namespace sklepDesktop
 
         public async Task ClearTerminal()
         {
-            await _httpClient.PostAsync($"{ip}/api/terminal/clear", null);
+            await _httpClient.PostAsync($"{Config.StoreBackendUrl}/api/terminal/clear", null);
+        }
+
+        public async Task<bool> TestConnection()
+        {
+            try
+            {
+                using (var client = new HttpClient())
+                {
+                    client.Timeout = TimeSpan.FromSeconds(3);
+                    var response = await client.GetAsync($"{Config.StoreBackendUrl}/api/test");
+                    return response.IsSuccessStatusCode;
+                }
+            }
+            catch
+            {
+                return false;
+            }
         }
     }
 }

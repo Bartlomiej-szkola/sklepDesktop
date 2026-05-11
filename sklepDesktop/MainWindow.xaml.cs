@@ -10,6 +10,8 @@ using System.Windows.Navigation;
 using System.Windows.Shapes;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Runtime.InteropServices;
+using System.Windows.Interop;
 
 
 namespace sklepDesktop
@@ -19,6 +21,21 @@ namespace sklepDesktop
     /// </summary>
     public partial class MainWindow : Window
     {
+        // --- WIN32 API CONSTANTS ---
+        private const int WM_SYSCOMMAND = 0x0112;
+        private const int MF_STRING = 0x0000;
+        private const int MF_SEPARATOR = 0x0800;
+        private const int IDM_CHANGESERVER = 1001; // Nasze unikalne ID menu
+
+        // --- WIN32 API IMPORT ---
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern IntPtr GetSystemMenu(IntPtr hWnd, bool bRevert);
+
+        [DllImport("user32.dll", CharSet = CharSet.Auto)]
+        private static extern bool InsertMenu(IntPtr hMenu, int uPosition, uint uFlags, uint uIDNewItem, string lpNewItem);
+        // --- WIN32 END ---
+
+
         private readonly BackendService _service;
         public ObservableCollection<BasketItem> Basket { get; set; } = new ObservableCollection<BasketItem>();
 
@@ -30,6 +47,48 @@ namespace sklepDesktop
             // Ustawiamy kursor od razu w polu skanowania po uruchomieniu
             TxtScan.Focus();
             DgBasket.ItemsSource = Basket;
+
+            // Rejestrujemy zdarzenie załadowania okna
+            this.Loaded += MainWindow_Loaded;
+        }
+
+        private void MainWindow_Loaded(object sender, RoutedEventArgs e)
+        {
+            // Pobieramy uchwyt (Handle) okna WPF
+            IntPtr hwnd = new WindowInteropHelper(this).Handle;
+            IntPtr hMenu = GetSystemMenu(hwnd, false);
+
+            // Dodajemy separator i nową opcję
+            InsertMenu(hMenu, -1, MF_SEPARATOR, 0, string.Empty);
+            InsertMenu(hMenu, -1, MF_STRING, IDM_CHANGESERVER, "Ustawienia serwera...");
+
+            // Podpinamy się pod pętlę komunikatów Windows
+            HwndSource source = HwndSource.FromHwnd(hwnd);
+            source.AddHook(WndProc);
+        }
+
+        // Metoda przechwytująca kliknięcia w menu systemowe
+        private IntPtr WndProc(IntPtr hwnd, int msg, IntPtr wParam, IntPtr lParam, ref bool handled)
+        {
+            if (msg == WM_SYSCOMMAND && wParam.ToInt32() == IDM_CHANGESERVER)
+            {
+                ShowChangeServerDialog();
+                handled = true;
+            }
+            return IntPtr.Zero;
+        }
+
+        private void ShowChangeServerDialog()
+        {
+            var configWindow = new ServerConfigWindow();
+            configWindow.Owner = this; // Żeby okno było wyśrodkowane względem głównego
+
+            if (configWindow.ShowDialog() == true)
+            {
+                // Jeśli użytkownik kliknął Zapisz
+                MessageBox.Show($"Zaktualizowano adres serwera!\nNowy adres: {Config.StoreBackendUrl}",
+                                "Konfiguracja", MessageBoxButton.OK, MessageBoxImage.Information);
+            }
         }
 
         // --- OBSŁUGA SKANOWANIA ---
