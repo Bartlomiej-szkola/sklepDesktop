@@ -1,0 +1,71 @@
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Ww][Ii][Nn]32/
+[Aa][Rr][Mm]/
+[Aa][Rr][Mm]64/
+bld/
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+
+# Visual Studio cache/options
+.vs/
+
+# Visual Studio Code
+.vscode/
+*.code-workspace
+
+# User-specific files
+*.rsuser
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+*.csproj.user
+
+# JetBrains Rider and other IDEs
+.idea/
+.rider/
+*.sln.iml
+.DS_Store
+
+# NuGet Packages
+*.nupkg
+*.snupkg
+*.nuget.props
+*.nuget.targets
+.nuget/
+
+# Local NuGet cache
+~/.nuget/
+
+# Entity Framework
+*.mdf
+*.ldf
+
+# Misc
+.vscode/*
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.swp
+*.swo
+*~
+.env
+.env.local
+
+# OS-specific
+Thumbs.db
+.DS_Store
+
+# Build artifacts
+PublishProfiles/
+*.publish.xml
+*.publishproj
