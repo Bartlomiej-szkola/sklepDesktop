@@ -53,7 +53,7 @@ namespace sklepDesktop
             await ConnectWebSocket();
 
             // UDERZAMY POD TĄ SAMĄ METODĘ W WPF, ALE WSKAZUJEMY INNĄ STRATEGIĘ "TRUSTPAY"
-            string initResult = await _service.InitiateCodePayment("TRUSTPAY", code, _amount, "Sklep WPF", _correlationId);
+            string initResult = await _service.InitiateCodePayment("TRUSTPAY", code, _amount, Config.ShopName, _correlationId);
 
             if (initResult == "PENDING")
             {

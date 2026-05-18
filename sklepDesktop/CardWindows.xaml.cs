@@ -90,7 +90,7 @@ namespace sklepDesktop
 
         private async Task AttemptBankPayment(string pin)
         {
-            string bankResult = await _service.ProcessCardPayment(_currentCardUid, _amount, "Sklep WPF", pin);
+            string bankResult = await _service.ProcessCardPayment(_currentCardUid, _amount, Config.ShopName, pin);
 
             if (bankResult == "SUCCESS")
             {
