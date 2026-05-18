@@ -10,7 +10,7 @@ using System.Windows.Input;
 
 namespace sklepDesktop
 {
-    public partial class BlikWindow : Window
+    public partial class TrustPayWindow : Window
     {
         private readonly BackendService _service;
         private readonly decimal _amount;
@@ -20,17 +20,17 @@ namespace sklepDesktop
 
         public bool PaymentSuccessful { get; private set; } = false;
 
-        public BlikWindow(BackendService service, decimal amount)
+        public TrustPayWindow(BackendService service, decimal amount)
         {
             InitializeComponent();
             _service = service;
             _amount = amount;
-            _correlationId = Guid.NewGuid().ToString(); // Unikalne ID naszej sesji płatniczej
+            _correlationId = "corr-" + Guid.NewGuid().ToString().Substring(0, 8); // Format np z przykladu
             LblAmount.Text = $"Do zapłaty: {_amount:N2} PLN";
-            TxtBlikCode.Focus();
+            TxtTrustPayCode.Focus();
         }
 
-        private void TxtBlikCode_PreviewTextInput(object sender, TextCompositionEventArgs e)
+        private void TxtTrustPayCode_PreviewTextInput(object sender, TextCompositionEventArgs e)
         {
             Regex regex = new Regex("[^0-9]+");
             e.Handled = regex.IsMatch(e.Text);
@@ -38,27 +38,26 @@ namespace sklepDesktop
 
         private async void BtnPay_Click(object sender, RoutedEventArgs e)
         {
-            string code = TxtBlikCode.Text;
+            string code = TxtTrustPayCode.Text;
             if (code.Length != 6)
             {
                 LblStatus.Text = "Wpisz dokładnie 6 cyfr!";
                 return;
             }
 
-            TxtBlikCode.IsEnabled = false;
+            TxtTrustPayCode.IsEnabled = false;
             BtnPay.IsEnabled = false;
-            LblStatus.Text = "Łączenie z serwerem BLIK...";
+            LblStatus.Text = "Komunikacja z siecią TrustPay...";
             LblStatus.Foreground = System.Windows.Media.Brushes.Orange;
 
-            // 1. Podłączamy WebSocket (żeby nasłuchiwać odpowiedzi, którą wypchnie asynchroniczny BLIK z backendu)
             await ConnectWebSocket();
 
-            // 2. Zlecamy płatność zlecając naszą unikalną correlationId (Strategia w backendzie wykona resztę)
-            string initResult = await _service.InitiateCodePayment("BLIK", code, _amount, "Sklep WPF", _correlationId);
+            // UDERZAMY POD TĄ SAMĄ METODĘ W WPF, ALE WSKAZUJEMY INNĄ STRATEGIĘ "TRUSTPAY"
+            string initResult = await _service.InitiateCodePayment("TRUSTPAY", code, _amount, "Sklep WPF", _correlationId);
 
             if (initResult == "PENDING")
             {
-                LblStatus.Text = "Potwierdź płatność w aplikacji banku (Oczekiwanie WebSocket)...";
+                LblStatus.Text = "Oczekiwanie na autoryzację operatora TrustPay (Webhook)...";
             }
             else
             {
@@ -76,11 +75,11 @@ namespace sklepDesktop
             try
             {
                 await _webSocket.ConnectAsync(new Uri(wsUrl), _cts.Token);
-                _ = ReceiveLoop(); // Startujemy nasłuchiwanie w tle
+                _ = ReceiveLoop();
             }
             catch
             {
-                MessageBox.Show("Błąd podłączania do WebSocketu Kasy.");
+                MessageBox.Show("Błąd połączenia. Upewnij się, że serwer Sklepu działa.");
             }
         }
 
@@ -98,7 +97,7 @@ namespace sklepDesktop
                     using (JsonDocument doc = JsonDocument.Parse(json))
                     {
                         var root = doc.RootElement;
-                        // Sprawdzamy czy to nasza wiadomość i czy zgadza się ID sesji (żeby nie przechwycić płatności z innej kasy)
+                        // Sprawdzamy czy otrzymano zwrotkę dla naszej konkretnej płatności
                         if (root.TryGetProperty("action", out var act) && act.GetString() == "PAYMENT_RESULT" &&
                             root.TryGetProperty("correlationId", out var corrId) && corrId.GetString() == _correlationId)
                         {
@@ -112,13 +111,13 @@ namespace sklepDesktop
                                     LblStatus.Text = "ZAPŁACONO!";
                                     LblStatus.Foreground = System.Windows.Media.Brushes.Green;
                                     await Task.Delay(1500);
-                                    this.DialogResult = true; // Zamyka pomyślnie
+                                    this.DialogResult = true;
                                 }
                                 else
                                 {
-                                    if (status == "REJECTED") LblStatus.Text = "Klient odrzucił płatność w telefonie!";
-                                    else if (status == "FAILED") LblStatus.Text = "Bank odrzucił transakcję!";
-                                    else if (status == "EXPIRED") LblStatus.Text = "Czas na potwierdzenie minął.";
+                                    if (status == "REJECTED") LblStatus.Text = "Płatność odrzucona przez TrustPay!";
+                                    else if (status == "EXPIRED") LblStatus.Text = "Czas sesji wygasł.";
+                                    else LblStatus.Text = "Błąd transakcji w sieci TrustPay.";
 
                                     LblStatus.Foreground = System.Windows.Media.Brushes.Red;
                                     ResetUI();
@@ -128,15 +127,15 @@ namespace sklepDesktop
                     }
                 }
             }
-            catch (Exception) { /* Okno zostało zamknięte */ }
+            catch (Exception) { }
         }
 
         private void ResetUI()
         {
-            TxtBlikCode.IsEnabled = true;
+            TxtTrustPayCode.IsEnabled = true;
             BtnPay.IsEnabled = true;
-            TxtBlikCode.Clear();
-            TxtBlikCode.Focus();
+            TxtTrustPayCode.Clear();
+            TxtTrustPayCode.Focus();
         }
 
         private void BtnCancel_Click(object sender, RoutedEventArgs e)

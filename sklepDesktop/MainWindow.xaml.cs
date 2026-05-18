@@ -521,7 +521,42 @@ namespace sklepDesktop
             }
         }
 
+        private async void BtnPayTrustPay_Click(object sender, RoutedEventArgs e)
+        {
+            if (Basket.Count == 0)
+            {
+                MessageBox.Show("Koszyk jest pusty!");
+                return;
+            }
 
+            decimal totalAmount = Basket.Sum(item => item.Total);
+
+            // Otwieramy nowe okno TrustPay
+            TrustPayWindow trustPayTerminal = new TrustPayWindow(_service, totalAmount);
+            trustPayTerminal.Owner = this;
+
+            bool? paymentResult = trustPayTerminal.ShowDialog();
+
+            if (paymentResult == true)
+            {
+                bool storeUpdated = await _service.FinalizeSale(Basket.ToList());
+                if (storeUpdated)
+                {
+                    MessageBox.Show("PARAGON WYDRUKOWANY. Dziękujemy za zakupy przez TrustPay!", "Sukces");
+                    Basket.Clear();
+                    UpdateTotal();
+                    LblCashierStatus.Text = "Zeskanuj produkt...";
+                }
+                else
+                {
+                    MessageBox.Show("UWAGA: Płatność pobrana, ale wystąpił błąd z aktualizacją bazy sklepu!", "Krytyczny Błąd");
+                }
+            }
+            else
+            {
+                MessageBox.Show("Płatność anulowana.", "Kasa");
+            }
+        }
 
 
     }

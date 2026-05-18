@@ -193,47 +193,9 @@ namespace sklepDesktop
 
         // --- OBSŁUGA BLIK POPRZEZ Backend Kasy (Port 8080) ---
 
-        public async Task<string> InitiateBlikPayment(string code, decimal amount, string storeName)
-        {
-            using (HttpClient client = new HttpClient())
-            {
-                try
-                {
-                    string amountStr = amount.ToString(System.Globalization.CultureInfo.InvariantCulture);
-                    // Uderzamy pod adres naszego Sklepu
-                    string url = $"{Config.StoreBackendUrl}/api/products/blik/initiate?code={code}&amount={amountStr}&storeName={Uri.EscapeDataString(storeName)}";
+        
 
-                    var response = await client.PostAsync(url, null);
-                    return await response.Content.ReadAsStringAsync();
-                }
-                catch (Exception ex)
-                {
-                    return $"BŁĄD SIECI: {ex.Message}";
-                }
-            }
-        }
-
-        public async Task<string> CheckBlikStatus(string code)
-        {
-            using (HttpClient client = new HttpClient())
-            {
-                try
-                {
-                    // Uderzamy do naszego Sklepu
-                    string url = $"{Config.StoreBackendUrl}/api/products/blik/status/{code}";
-                    var response = await client.GetAsync(url);
-
-                    if (response.IsSuccessStatusCode)
-                        return await response.Content.ReadAsStringAsync();
-
-                    return "ERROR";
-                }
-                catch
-                {
-                    return "ERROR";
-                }
-            }
-        }
+        
 
         // --- OBSŁUGA TERMINALA KART ---
 
@@ -294,6 +256,34 @@ namespace sklepDesktop
             catch
             {
                 return false;
+            }
+        }
+
+        // --- NOWA, ZUNIFIKOWANA OBSŁUGA PŁATNOŚCI 6-CYFROWYCH ---
+        public async Task<string> InitiateCodePayment(string method, string code, decimal amount, string storeName, string correlationId)
+        {
+            try
+            {
+                string url = $"{Config.StoreBackendUrl}/api/payments/initiate/{method}";
+
+                var request = new
+                {
+                    code = code,
+                    amount = amount,
+                    storeName = storeName,
+                    correlationId = correlationId
+                };
+
+                var response = await _httpClient.PostAsJsonAsync(url, request, _jsonOptions);
+                if (response.IsSuccessStatusCode)
+                {
+                    return "PENDING";
+                }
+                return "BŁĄD ZLECENIA PŁATNOŚCI";
+            }
+            catch (Exception ex)
+            {
+                return $"BŁĄD SIECI: {ex.Message}";
             }
         }
     }

@@ -298,6 +298,7 @@
                             <TextBlock Text="DO ZAPŁATY" Foreground="#616161" HorizontalAlignment="Center" FontSize="18" FontWeight="Bold"/>
                             <TextBlock Name="LblTotalSum" Text="0,00 PLN" Foreground="#1B5E20" HorizontalAlignment="Center" FontSize="72" FontWeight="Bold" Margin="0,8,0,35"/>
                             <Button Content="PŁAĆ BLIK" Background="#D32F2F" Foreground="White" Height="60" FontSize="18" FontWeight="Bold" Margin="0,5" Click="BtnFinalizeSale_Click"/>
+                            <Button Content="PŁAĆ TRUSTPAY" Background="#09548E" Foreground="White" Height="60" FontSize="18" FontWeight="Bold" Margin="0,5" Click="BtnPayTrustPay_Click"/>
                             <Button Content="PŁAĆ KARTĄ" Background="#1976D2" Foreground="White" Height="60" FontSize="18" FontWeight="Bold" Margin="0,5" Click="BtnPayCard_Click"/>
                             <Separator Background="#CFD8DC" Margin="0,30"/>
 
