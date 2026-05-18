@@ -54,7 +54,7 @@ namespace sklepDesktop
             await ConnectWebSocket();
 
             // 2. Zlecamy płatność zlecając naszą unikalną correlationId (Strategia w backendzie wykona resztę)
-            string initResult = await _service.InitiateCodePayment("BLIK", code, _amount, "Sklep WPF", _correlationId);
+            string initResult = await _service.InitiateCodePayment("BLIK", code, _amount, Config.ShopName, _correlationId);
 
             if (initResult == "PENDING")
             {
